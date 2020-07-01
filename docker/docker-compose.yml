@@ -1,0 +1,39 @@
+version: '3'
+services:
+  marc-database:
+    restart: always
+    build:
+      context: .
+      dockerfile: ./mysql/Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: marc_db
+    ports:
+      - '3306:3306'
+    networks:
+      marcdomain:
+    container_name: marc_mysql_database
+
+  marc-server:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    depends_on:
+      - marc-database
+    ports:
+      - '8030:80'
+    networks:
+      marcdomain:
+    container_name: marc_server
+
+  marc-kibana:
+    image: kibana:6.4.2
+    ports:
+      - '5601:5601'
+    networks:
+      marcdomain:
+    container_name: marc_kibana
+
+networks:
+  marcdomain:
+    driver: bridge

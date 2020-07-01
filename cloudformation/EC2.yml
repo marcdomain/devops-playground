@@ -1,0 +1,63 @@
+---
+Description: "Cloudformation provioning Express server"
+Resources:
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+        GroupDescription: Allow http connection to client host
+        SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-0a63f96e85105c6d3 # Ubuntu 18.04
+      UserData:
+        'Fn::Base64':
+          !Sub |
+          #!/bin/bash
+
+          apt-get update
+
+          # install NodeJS
+          curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh
+          sudo bash nodesource_setup.sh
+          sudo apt-get install -y nodejs
+
+          # set up repository
+          git clone https://github.com/marcdomain/basic-express-app.git
+          cd basic-express-app
+          npm install
+
+          # setup NGINX server
+          sudo apt-get install nginx -y
+          sudo rm -r /etc/nginx/sites-enabled/default
+          sudo echo "
+            server  {
+              listen 80;
+              location / {
+                proxy_pass http://127.0.0.1:3000;
+              }
+            }
+          " > /etc/nginx/sites-available/marcdomain
+          sudo ln -s /etc/nginx/sites-available/marcdomain /etc/nginx/sites-enabled/marcdomain
+          sudo service nginx restart
+
+          # install PM2
+          sudo npm install pm2 -g
+
+          # start server with PM2 to keep the server alive
+          pm2 start npm --name "basic-express-app" -- start
+      SecurityGroups:
+        - !Ref EC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: Marc EC2 Instance name
+        - Key: Type
+          Value: Marc EC2 Instance key
+  # Outputs:
+  #   Description: Ec2Instance Public IP
+  #   Value: !GetAtt Ec2Instance.PublicIp
