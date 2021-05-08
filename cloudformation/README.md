@@ -1,6 +1,6 @@
 # CLOUDFORMATION & BASH FOR INFRASTRUCTURE AUTOMATION
 
-In this project, Cloudformation is used to deploy an infrastructure as code (IaC). It provisions an AWS EC2 instance and sets up a simple NodeJS-Express application. The bash script in this project directory clones the application from `https://github.com/marcdomain/basic-express-app.git`, and sets it up. It also configures NGINX for reverse proxy automation. The terraform file structure is designed to separate concerns.
+In this project, Cloudformation is used to deploy an infrastructure as code (IaC). It provisions an AWS EC2 instance and sets up a simple NodeJS-Express application. The bash script in this project directory clones the application from `https://github.com/marcdomain/basic-express-app.git`, and sets it up. It also configures NGINX for reverse proxy automation.
 
 ## USAGE
 
